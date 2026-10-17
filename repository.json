@@ -8,6 +8,14 @@
     "owner": "vandernorth",
     "versions": [
       {
+        "changelog": "- Images tab: image overrides for the Video On-Demand, Series and Catch-up channels and for each selected VOD and series category (#2)\n- XMLTV parser no longer skips the element after a text element, e.g. an `<icon>` after `<category>` (#1)",
+        "checksum": "0457c7d73956cafa12932d81e41c9bec",
+        "sourceUrl": "https://github.com/vandernorth/Jellyfin.Xtream/releases/download/v0.9.1/jellyfin-xtream_0.9.1.0.zip",
+        "targetAbi": "12.0.0.0",
+        "timestamp": "2026-10-17T13:45:35Z",
+        "version": "0.9.1.0"
+      },
+      {
         "changelog": "Combined build of [Kevinjil/Jellyfin.Xtream](https://github.com/Kevinjil/Jellyfin.Xtream) with open upstream PRs:\n\n- #301 Support Jellyfin 12 (targets net10.0, ABI 12.0.0.0)\n- #302 Fix series, seasons and movies lost to unexpected provider data\n- #299 External XMLTV EPG support for Live TV channels\n\nPlugin repository: `https://vandernorth.github.io/Jellyfin.Xtream/repository.json`\n\nThanks to Kevin Jilissen, achevalet and Emerald-Railroad for the original work.",
         "checksum": "e342fa9ef776a776454c5bb13ea8f4ee",
         "sourceUrl": "https://github.com/vandernorth/Jellyfin.Xtream/releases/download/v0.9.0/jellyfin-xtream_0.9.0.0.zip",
