@@ -8,6 +8,14 @@
     "owner": "vandernorth",
     "versions": [
       {
+        "changelog": "- Local images configured on the Images tab are no longer moved away by Jellyfin on a channel refresh (#3)",
+        "checksum": "40a0fd4fdbbe4e12e2844f3262b56f03",
+        "sourceUrl": "https://github.com/vandernorth/Jellyfin.Xtream/releases/download/v0.9.2/jellyfin-xtream_0.9.2.0.zip",
+        "targetAbi": "12.0.0.0",
+        "timestamp": "2026-10-17T14:15:43Z",
+        "version": "0.9.2.0"
+      },
+      {
         "changelog": "- Images tab: image overrides for the Video On-Demand, Series and Catch-up channels and for each selected VOD and series category (#2)\n- XMLTV parser no longer skips the element after a text element, e.g. an `<icon>` after `<category>` (#1)",
         "checksum": "0457c7d73956cafa12932d81e41c9bec",
         "sourceUrl": "https://github.com/vandernorth/Jellyfin.Xtream/releases/download/v0.9.1/jellyfin-xtream_0.9.1.0.zip",
