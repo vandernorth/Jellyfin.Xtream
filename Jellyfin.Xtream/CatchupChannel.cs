@@ -211,7 +211,8 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
         {
             ParsedName parsedName = StreamService.ParseName(epg.Title);
             int durationMinutes = (int)Math.Ceiling((epg.End - epg.Start).TotalMinutes);
-            string dateTitle = epg.Start.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture);
+            string dateFormat = plugin.Configuration.IsCatchupDateVisible ? "dd.MM. HH:mm" : "HH:mm";
+            string dateTitle = epg.Start.ToLocalTime().ToString(dateFormat, CultureInfo.InvariantCulture);
             List<MediaSourceInfo> sources = [
                 plugin.StreamService.GetMediaSourceInfo(StreamType.CatchUp, channelId, start: epg.StartLocalTime, durationMinutes: durationMinutes)
             ];

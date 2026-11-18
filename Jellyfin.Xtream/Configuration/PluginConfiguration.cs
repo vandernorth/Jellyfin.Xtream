@@ -61,6 +61,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool IsCatchupVisible { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the air date is included in catch-up programme titles.
+    /// </summary>
+    public bool IsCatchupDateVisible { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the Series channel is visible.
     /// </summary>
     public bool IsSeriesVisible { get; set; }

@@ -11,6 +11,8 @@ export default function (view) {
     const getConfig = ApiClient.getPluginConfiguration(pluginId);
     const visible = view.querySelector("#Visible");
     getConfig.then((config) => visible.checked = config.IsCatchupVisible);
+    const catchupDateVisible = view.querySelector("#CatchupDateVisible");
+    getConfig.then((config) => catchupDateVisible.checked = config.IsCatchupDateVisible);
     const table = view.querySelector('#LiveContent');
     Xtream.populateCategoriesTable(
       table,
@@ -23,6 +25,7 @@ export default function (view) {
 
         ApiClient.getPluginConfiguration(pluginId).then((config) => {
           config.IsCatchupVisible = visible.checked;
+          config.IsCatchupDateVisible = catchupDateVisible.checked;
           config.LiveTv = data;
           ApiClient.updatePluginConfiguration(pluginId, config).then((result) => {
             Dashboard.processPluginConfigurationUpdateResult(result);
