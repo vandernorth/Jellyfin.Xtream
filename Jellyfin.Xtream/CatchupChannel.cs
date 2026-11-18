@@ -23,6 +23,7 @@ using Jellyfin.Xtream.Client;
 using Jellyfin.Xtream.Client.Models;
 using Jellyfin.Xtream.Service;
 using MediaBrowser.Controller.Channels;
+using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Channels;
 using MediaBrowser.Model.Dto;
@@ -178,6 +179,7 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
         StreamInfo channel = streams.FirstOrDefault(s => s.StreamId == channelId)
             ?? throw new ArgumentException($"Channel with id {channelId} not found in category {categoryId}");
         EpgListings epgs = await xtreamClient.GetEpgInfoAsync(plugin.Creds, channelId, cancellationToken).ConfigureAwait(false);
+        List<ProgramInfo> customPrograms = GetCustomXmlTvPrograms(plugin, channel, start, end);
         List<ChannelItemInfo> items = [];
 
         // Create fallback single-stream catch-up if no EPG is available.
@@ -193,6 +195,7 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
                             ContentType = ChannelMediaContentType.TvExtra,
                             DateModified = StreamService.MediaSourceRevision,
                             Id = StreamService.ToGuid(StreamService.CatchupStreamPrefix, channelId, 0, day).ToString(),
+                            ImageUrl = channel.StreamIcon,
                             IsLiveStream = false,
                             MediaSources = [
                                 plugin.StreamService.GetMediaSourceInfo(StreamType.CatchUp, channelId, start: start, durationMinutes: durationMinutes)
@@ -215,6 +218,7 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
             List<MediaSourceInfo> sources = [
                 plugin.StreamService.GetMediaSourceInfo(StreamType.CatchUp, channelId, start: epg.StartLocalTime, durationMinutes: durationMinutes)
             ];
+            string? imageUrl = FindProgrammeImageUrl(customPrograms, epg) ?? channel.StreamIcon;
 
             items.Add(new()
             {
@@ -222,6 +226,7 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
                 DateCreated = epg.Start,
                 DateModified = StreamService.MediaSourceRevision,
                 Id = StreamService.ToGuid(StreamService.CatchupStreamPrefix, channel.StreamId, epg.Id, day).ToString(),
+                ImageUrl = imageUrl,
                 IsLiveStream = false,
                 MediaSources = sources,
                 MediaType = ChannelMediaType.Video,
@@ -240,6 +245,58 @@ public class CatchupChannel(ILogger<CatchupChannel> logger, IXtreamClient xtream
             TotalRecordCount = items.Count
         };
         return result;
+    }
+
+    private static string? FindProgrammeImageUrl(List<ProgramInfo> customPrograms, EpgInfo epg)
+    {
+        if (customPrograms.Count == 0)
+        {
+            return null;
+        }
+
+        DateTime epgStartUtc = epg.Start.ToUniversalTime();
+        DateTime epgEndUtc = epg.End.ToUniversalTime();
+        ProgramInfo? match = customPrograms
+            .Where(p => !string.IsNullOrWhiteSpace(p.ImageUrl) && p.StartDate < epgEndUtc && p.EndDate > epgStartUtc)
+            .OrderBy(p => Math.Abs((p.StartDate - epgStartUtc).TotalSeconds))
+            .FirstOrDefault();
+        return match?.ImageUrl;
+    }
+
+    private List<ProgramInfo> GetCustomXmlTvPrograms(Plugin plugin, StreamInfo channel, DateTime start, DateTime end)
+    {
+        string customEpgPath = plugin.Configuration.CustomEpgPath;
+        if (string.IsNullOrWhiteSpace(customEpgPath))
+        {
+            return [];
+        }
+
+        string? epgId = channel.EpgChannelId;
+        if (plugin.Configuration.LiveTvOverrides.TryGetValue(channel.StreamId, out Configuration.ChannelOverrides? overrides)
+            && !string.IsNullOrWhiteSpace(overrides.EpgId))
+        {
+            epgId = overrides.EpgId;
+        }
+
+        if (string.IsNullOrWhiteSpace(epgId))
+        {
+            return [];
+        }
+
+        try
+        {
+            return XmlTvGuideService.GetPrograms(
+                customEpgPath,
+                epgId,
+                channel.StreamId.ToString(CultureInfo.InvariantCulture),
+                start.ToUniversalTime(),
+                end.ToUniversalTime()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load custom XMLTV thumbnails from {Path}", customEpgPath);
+            return [];
+        }
     }
 
     /// <inheritdoc />
